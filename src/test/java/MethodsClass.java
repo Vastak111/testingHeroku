@@ -19,7 +19,7 @@ public class MethodsClass {
     private String fileUploadedConfirm = "//h3[contains(text(),'File Uploaded!')]";
     private String iFrameField = "mce_0_ifr";
     private String iFrameInputField = "//body[@id='tinymce']";
-    private String searchQueryApi = "http://jsonplaceholder.typicode.com/todos?_start=0&_limit=5";
+    private String apiQuery = "http://jsonplaceholder.typicode.com/todos?_start=0&_limit=5";
 
     public String getHerokuAppAddress() {
         return herokuAppAddress;
@@ -88,8 +88,8 @@ public class MethodsClass {
         return iFrameInputField;
     }
 
-    public String getSearchQueryApi() {
-        return searchQueryApi;
+    public String getApiQuery() {
+        return apiQuery;
     }
 
     public String getAbsoluteFilePath(String relativeFilePath) {

@@ -111,7 +111,7 @@ public class Tests extends ParentClass {
                 .findElement(By.xpath(method.getiFrameInputField())));
         iFrameInput.clear();
 
-        JsonNode body = Unirest.get(method.getSearchQueryApi())
+        JsonNode body = Unirest.get(method.getApiQuery())
                 .asJson()
                 .getBody();
 
