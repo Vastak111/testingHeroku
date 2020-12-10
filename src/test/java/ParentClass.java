@@ -8,7 +8,9 @@ public class ParentClass {
 
     @BeforeTest
     public void getDriver() {
-        System.setProperty("webdriver.chrome.driver", "C:/Users/valerii.liasotskyi/Downloads/SOFT/chromedriver.exe");
+        System.setProperty("webdriver.chrome.driver",
+                "C:/Users/valerii.liasotskyi/Downloads/SOFT/chromedriver.exe"); //Insert here address of your
+        //downloaded chromeDriver.exe
         chromeDriver = new ChromeDriver();
         methodsClass = new MethodsClass();
     }
