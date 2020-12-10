@@ -1,15 +1,13 @@
-import com.mashape.unirest.http.JsonNode;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
-import org.json.JSONObject;
+import org.json.JSONArray;
 import org.openqa.selenium.*;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import java.util.Iterator;
+import java.io.IOException;
 import java.util.List;
 
 public class Tests extends ParentClass {
-
+//All Thread.sleep() were added to make tests more visual, they don't affect test's functionality
+//Tests works well without them
     MethodsClass method = new MethodsClass();
 
     @Test
@@ -17,21 +15,23 @@ public class Tests extends ParentClass {
 
         chromeDriver.get(method.getHerokuAppAddress());
         chromeDriver.manage().window().maximize();
+        Thread.sleep(500);
 
         WebElement addRemoveElements = chromeDriver.findElement(By.linkText(method.getRemoveElementsAddress()));
         addRemoveElements.click();
+        Thread.sleep(500);
 
         WebElement addElementButton = chromeDriver.findElementByXPath(method.getAddElementButton());
         for (int i = 0; i <= 2; i++) {
             addElementButton.click();
-            Thread.sleep(1000); //waiting for elements to appear
+            Thread.sleep(1000);
         }
 
         List<WebElement> deleteButtons = chromeDriver.findElementsByXPath(method.getAddedManually());
         Assert.assertEquals(deleteButtons.size(), 3, "There are NOT 3 delete buttons");
 
         deleteButtons.get(0).click();
-        Thread.sleep(500); //waiting for element to disappear
+        Thread.sleep(500);
         deleteButtons = chromeDriver.findElementsByXPath(method.getAddedManually());
         Assert.assertEquals(deleteButtons.size(), 2, "There are NOT 2 elements left");
     }
@@ -41,19 +41,21 @@ public class Tests extends ParentClass {
 
         chromeDriver.get(method.getHerokuAppAddress());
         chromeDriver.manage().window().maximize();
+        Thread.sleep(500);
 
         WebElement javaScriptAlerts = chromeDriver.findElement(By.linkText(method.getJavaScriptAlertsLink()));
         javaScriptAlerts.click();
+        Thread.sleep(500);
 
         try {
             WebElement clickForJSAlertButton = chromeDriver.findElementByXPath(method.getClickForJSAlertXPath());
             clickForJSAlertButton.click();
-            Thread.sleep(500); //waiting for element to appear
+            Thread.sleep(500);
             chromeDriver.switchTo().alert().accept();
         } catch (TimeoutException e) {
             System.out.println("The alert hasn't appeared");
         }
-        Thread.sleep(500); //waiting for text to appear
+        Thread.sleep(500);
 
         WebElement alertResult = chromeDriver.findElementByXPath(method.getAlertResult());
         Assert.assertEquals(alertResult.getText(), "You successfuly clicked an alert",
@@ -62,12 +64,12 @@ public class Tests extends ParentClass {
         try {
             WebElement clickForJSConfirm = chromeDriver.findElementByXPath(method.getClickForJSConfirm());
             clickForJSConfirm.click();
-            Thread.sleep(500);//waiting for element to appear
+            Thread.sleep(500);
             chromeDriver.switchTo().alert().dismiss();
         } catch (TimeoutException e) {
             System.out.println("The alert hasn't appeared");
         }
-        Thread.sleep(500); //waiting for text to appear
+        Thread.sleep(500);
 
         alertResult = chromeDriver.findElementByXPath(method.getAlertResult());
         Assert.assertEquals(alertResult.getText(), "You clicked: Cancel",
@@ -76,14 +78,14 @@ public class Tests extends ParentClass {
         try {
             WebElement clickForJSPrompt = chromeDriver.findElementByXPath(method.getClickForJSPrompt());
             clickForJSPrompt.click();
-            Thread.sleep(500);//waiting for element to appear
+            Thread.sleep(500);
             Alert alert = chromeDriver.switchTo().alert();
             alert.sendKeys("asd");
             alert.accept();
         } catch (TimeoutException e) {
             System.out.println("The alert hasn't appeared");
         }
-        Thread.sleep(500); //waiting for text to appear
+        Thread.sleep(500);
 
         alertResult = chromeDriver.findElementByXPath(method.getAlertResult());
         Assert.assertEquals(alertResult.getText(), "You entered: asd",
@@ -91,18 +93,18 @@ public class Tests extends ParentClass {
     }
 
     @Test
-    public void test3() throws InterruptedException, UnirestException {
+    public void test3() throws InterruptedException, IOException {
 
         chromeDriver.get(method.getHerokuAppAddress());
         chromeDriver.manage().window().maximize();
-        Thread.sleep(500);//waiting for element to appear
+        Thread.sleep(500);
 
         WebElement frames = chromeDriver.findElementByXPath(method.getFramesLink());
         frames.click();
-        Thread.sleep(500);//waiting for element to appear
+        Thread.sleep(500);
         WebElement iFrame = chromeDriver.findElementByXPath(method.getiFrameLink());
         iFrame.click();
-        Thread.sleep(500);//waiting for element to appear
+        Thread.sleep(500);
 
         chromeDriver.switchTo().frame(method.getiFrameField());
         JavascriptExecutor js = chromeDriver;
@@ -110,60 +112,38 @@ public class Tests extends ParentClass {
         js.executeScript("arguments[0].click();", iFrameInput = chromeDriver
                 .findElement(By.xpath(method.getiFrameInputField())));
         iFrameInput.clear();
+        Thread.sleep(500);
 
-        JsonNode body = Unirest.get(method.getApiQuery())
-                .asJson()
-                .getBody();
-
-        Iterator arrayOfBodies = body.getArray().iterator();
-        while (arrayOfBodies.hasNext()) {
-            JSONObject element = (JSONObject) arrayOfBodies.next();
-            iFrameInput.sendKeys(element.get("title") + "\n");
-        }
+        String httpResponse = method.runHttpRequest();
+        JSONArray httpResponseJSON = method.convertStringToJsonObject(httpResponse);
+        List<String> titles = method.getTitles(httpResponseJSON);
+        iFrameInput.sendKeys(String.join("\n", titles));
+        Thread.sleep(500);
     }
-
-//
-//    private OkHttpClient client = new OkHttpClient(); //this way is picked in Selenium documentation,
-//    //but as far as I've found Request.Builder() is not included in it's standalone library, so it's not
-    // completely native
-//
-//    public void run() throws Exception {
-//        Request request = new Request.Builder()
-//                .url("http://jsonplaceholder.typicode.com/todos?_start=0&_limit=5")
-//                .build();
-//
-//        try (Response response = client.newCall(request).execute()) {
-//            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-//
-//            Headers responseHeaders = response.headers();
-//            for (int i = 0; i < responseHeaders.size(); i++) {
-//                System.out.println(responseHeaders.name(i) + ": " + responseHeaders.value(i));
-//            }
-
-
 
     @Test
     public void test4() throws InterruptedException {
 
         chromeDriver.get(method.getHerokuAppAddress());
         chromeDriver.manage().window().maximize();
+        Thread.sleep(500);
 
         WebElement fileUpload = chromeDriver.findElementByXPath(method.getFileUploadLink());
         fileUpload.click();
-        Thread.sleep(500); //waiting for page loading
+        Thread.sleep(500);
 
         WebElement fileUploadButton = chromeDriver.findElementByXPath(method.getFileUploadButton());
         fileUploadButton.sendKeys(method.getAbsoluteFilePath(
-                "src/test/java/files_for_upload/red.jpg")); //insert here
-        // relative address of file you want to upload
-        Thread.sleep(500); //waiting for page loading
+                "src/main/resources/files_for_upload/red.jpg"));
+        Thread.sleep(500);
 
         WebElement fileSubmit = chromeDriver.findElementByXPath(method.getFileSubmitButton());
         fileSubmit.click();
-        Thread.sleep(500); //waiting for page loading
+        Thread.sleep(500);
 
         WebElement fileUploaded = chromeDriver.findElementByXPath(method.getFileUploadedConfirm());
         Assert.assertEquals(fileUploaded.getText(), "File Uploaded!",
                 "Wasn't received message about successful file uploading");
+        Thread.sleep(1000);
     }
 }

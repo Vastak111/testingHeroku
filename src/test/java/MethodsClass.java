@@ -1,4 +1,11 @@
+import okhttp3.*;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MethodsClass {
 
@@ -20,6 +27,7 @@ public class MethodsClass {
     private String iFrameField = "mce_0_ifr";
     private String iFrameInputField = "//body[@id='tinymce']";
     private String apiQuery = "http://jsonplaceholder.typicode.com/todos?_start=0&_limit=5";
+    private OkHttpClient client = new OkHttpClient();
 
     public String getHerokuAppAddress() {
         return herokuAppAddress;
@@ -44,6 +52,7 @@ public class MethodsClass {
     public String getClickForJSAlertXPath() {
         return clickForJSAlertXPath;
     }
+
     public String getAlertResult() {
         return alertResult;
     }
@@ -88,12 +97,43 @@ public class MethodsClass {
         return iFrameInputField;
     }
 
-    public String getApiQuery() {
-        return apiQuery;
-    }
-
     public String getAbsoluteFilePath(String relativeFilePath) {
         File file = new File(relativeFilePath);
         return file.getAbsolutePath();
+    }
+
+    public String runHttpRequest() throws IOException {
+        Request request = new Request.Builder()
+                .url(apiQuery)
+                .build();
+
+        Response response = client.newCall(request).execute();
+        if (!response.isSuccessful())
+            throw new IOException("Unexpected code " + response);
+
+        ResponseBody responseBody = response.body();
+        if (responseBody != null) {
+            return responseBody.string();
+        } else throw new IOException("Body is null");
+    }
+
+    public JSONArray convertStringToJsonObject(String string) {
+        JSONArray jsonArray = null;
+        try {
+            jsonArray = new JSONArray(string);
+        }catch (JSONException err){
+            System.out.println("Error" + err.toString());
+        }
+        return jsonArray;
+    }
+
+    public List<String> getTitles(JSONArray jsonArray) {
+        List<String> titlesList = new ArrayList<>();
+        for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject jsonObject = jsonArray.getJSONObject(i);
+            String title = jsonObject.getString("title");
+            titlesList.add(title);
+        }
+        return titlesList;
     }
 }
