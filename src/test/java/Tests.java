@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.util.List;
 
 public class Tests extends Basic {
-    private XPathClass xPath = new XPathClass();
-    private FileHandler fileHandler = new FileHandler();
-    private JSONHandler jsonHandler = new JSONHandler();
+    private final XPathClass xPath = new XPathClass();
+    private final FileHandler fileHandler = new FileHandler();
+    private final JSONHandler jsonHandler = new JSONHandler();
 
     @Test
     public void test1() {
@@ -30,15 +30,15 @@ public class Tests extends Basic {
     }
 
     @Test
-    public void test2() throws InterruptedException {
+    public void test2() {
 
         Actions.INSTANCE.openSite(getChromeDriver(), xPath.getHerokuAppAddress());
 
         WebElement javaScriptAlerts = getChromeDriver().findElementByXPath(xPath.getJavaScriptAlertsLink());
         javaScriptAlerts.click();
 
+        click(xPath.getClickForJSAlertXPath());
         try {
-            click(xPath.getClickForJSAlertXPath());
             getChromeDriver().switchTo().alert().accept();
         } catch (TimeoutException e) {
             Assert.fail("The alert hasn't appeared");
@@ -48,8 +48,8 @@ public class Tests extends Basic {
         Assert.assertEquals(alertResult.getText(), "You successfuly clicked an alert",
                 "The Result text is wrong");
 
+        click(xPath.getClickForJSConfirm());
         try {
-            click(xPath.getClickForJSConfirm());
             getChromeDriver().switchTo().alert().dismiss();
         } catch (TimeoutException e) {
             Assert.fail("The alert hasn't appeared");
@@ -59,8 +59,8 @@ public class Tests extends Basic {
         Assert.assertEquals(alertResult.getText(), "You clicked: Cancel",
                 "The Result text is wrong");
 
+        click(xPath.getClickForJSPrompt());
         try {
-            click(xPath.getClickForJSPrompt());
             Alert alert = getChromeDriver().switchTo().alert();
             alert.sendKeys("asd");
             alert.accept();
@@ -74,7 +74,7 @@ public class Tests extends Basic {
     }
 
     @Test
-    public void test3() throws InterruptedException, IOException {
+    public void test3() throws IOException {
 
         Actions.INSTANCE.openSite(getChromeDriver(), xPath.getHerokuAppAddress());
 
@@ -95,7 +95,7 @@ public class Tests extends Basic {
     }
 
     @Test
-    public void test4() throws InterruptedException {
+    public void test4() {
 
         Actions.INSTANCE.openSite(getChromeDriver(), xPath.getHerokuAppAddress());
 
